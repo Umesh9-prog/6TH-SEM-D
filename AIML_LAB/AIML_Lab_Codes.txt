@@ -1,0 +1,276 @@
+TermWork-1.b
+
+Find S
+
+
+ALgorithm 
+
+
+1. Initilize h to the most specific hypothesis in H
+2. For each positive training instance x
+      For each attribute contraint ai in h
+          If the contraint ai is satisfied by x
+              then do nothing
+          Else
+              replace ai in h by the next more general constraint that is satisfied by x
+3. Output the hypothesis h
+
+Code:
+
+
+"""
+1. Implement and demonstrate the FIND-S algorithm for finding the  
+most specific hypothesis based on a given set of training data samples. 
+Read the training data from a .CSV file
+"""
+import csv
+a = []
+with open('enjoysport.csv', 'r') as csvfile:
+    next(csvfile)
+    for row in csv.reader(csvfile):
+        a.append(row)
+    print(a)
+
+print("\nThe total number of training instances are : ",len(a))
+
+num_attribute = len(a[0])-1
+
+print("\nThe initial hypothesis is : ")
+hypothesis = ['0']*num_attribute
+print(hypothesis)
+
+for i in range(0, len(a)):
+    if a[i][num_attribute] == 'yes':
+        print ("\nInstance ", i+1, "is", a[i], " and is Positive Instance")
+        for j in range(0, num_attribute):
+            if hypothesis[j] == '0' or hypothesis[j] == a[i][j]:
+                hypothesis[j] = a[i][j]
+            else:
+                hypothesis[j] = '?'
+        print("The hypothesis for the training instance", i+1, " is: " , hypothesis, "\n")
+
+    if a[i][num_attribute] == 'no':
+        print ("\nInstance ", i+1, "is", a[i], " and is Negative Instance Hence Ignored")
+        print("The hypothesis for the training instance", i+1, " is: " , hypothesis, "\n")
+
+print("\nThe Maximally specific hypothesis for the training instance is ", hypothesis)
+
+
+
+//candidate elimintion 
+
+Code:
+
+import numpy as np 
+import pandas as pd
+
+data = pd.read_csv(path+'/enjoysport.csv')
+concepts = np.array(data.iloc[:,0:-1])
+print("\nInstances are:\n",concepts)
+target = np.array(data.iloc[:,-1])
+print("\nTarget Values are: ",target)
+
+def learn(concepts, target): 
+    specific_h = concepts[0].copy()
+    print("\nInitialization of specific_h and genearal_h")
+    print("\nSpecific Boundary: ", specific_h)
+    general_h = [["?" for i in range(len(specific_h))] for i in range(len(specific_h))]
+    print("\nGeneric Boundary: ",general_h)  
+
+    for i, h in enumerate(concepts):
+        print("\nInstance", i+1 , "is ", h)
+        if target[i] == "yes":
+            print("Instance is Positive ")
+            for x in range(len(specific_h)): 
+                if h[x]!= specific_h[x]:                    
+                    specific_h[x] ='?'                     
+                    general_h[x][x] ='?'
+                   
+        if target[i] == "no":            
+            print("Instance is Negative ")
+            for x in range(len(specific_h)): 
+                if h[x]!= specific_h[x]:                    
+                    general_h[x][x] = specific_h[x]                
+                else:                    
+                    general_h[x][x] = '?'        
+        
+        print("Specific Bundary after ", i+1, "Instance is ", specific_h)         
+        print("Generic Boundary after ", i+1, "Instance is ", general_h)
+        print("\n")
+
+    indices = [i for i, val in enumerate(general_h) if val == ['?', '?', '?', '?', '?', '?']]    
+    for i in indices:   
+        general_h.remove(['?', '?', '?', '?', '?', '?']) 
+    return specific_h, general_h 
+
+s_final, g_final = learn(concepts, target)
+
+print("Final Specific_h: ", s_final, sep="\n")
+print("Final General_h: ", g_final, sep="\n")
+
+
+o/p
+
+Instances are:
+[[‘sunny’ ‘warm’ ‘normal’ ‘strong’ ‘warm’ ‘same’]
+[‘sunny’ ‘warm’ ‘high’ ‘strong’ ‘warm’ ‘same’]
+[‘rainy’ ‘cold’ ‘high’ ‘strong’ ‘warm’ ‘change’]
+[‘sunny’ ‘warm’ ‘high’ ‘strong’ ‘cool’ ‘change’]]
+
+Target Values are: [‘yes’ ‘yes’ ‘no’ ‘yes’]
+
+Initialization of specific_h and genearal_h
+
+Specific Boundary: [‘sunny’ ‘warm’ ‘normal’ ‘strong’ ‘warm’ ‘same’]
+
+Generic Boundary: [[‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’]]
+
+Instance 1 is [‘sunny’ ‘warm’ ‘normal’ ‘strong’ ‘warm’ ‘same’] Instance is Positive
+
+Specific Bundary after 1 Instance is [‘sunny’ ‘warm’ ‘normal’ ‘strong’ ‘warm’ ‘same’]
+
+Generic Boundary after 1 Instance is [[‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’]]
+
+Instance 2 is [‘sunny’ ‘warm’ ‘high’ ‘strong’ ‘warm’ ‘same’] Instance is Positive
+
+Specific Bundary after 2 Instance is [‘sunny’ ‘warm’ ‘?’ ‘strong’ ‘warm’ ‘same’]
+
+Generic Boundary after 2 Instance is [[‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’]]
+
+Instance 3 is [‘rainy’ ‘cold’ ‘high’ ‘strong’ ‘warm’ ‘change’] Instance is Negative
+
+Specific Bundary after 3 Instance is [‘sunny’ ‘warm’ ‘?’ ‘strong’ ‘warm’ ‘same’]
+
+Generic Boundary after 3 Instance is [[‘sunny’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘warm’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘same’]]
+
+Instance 4 is [‘sunny’ ‘warm’ ‘high’ ‘strong’ ‘cool’ ‘change’] Instance is Positive
+
+Specific Bundary after 4 Instance is [‘sunny’ ‘warm’ ‘?’ ‘strong’ ‘?’ ‘?’]
+
+Generic Boundary after 4 Instance is [[‘sunny’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘warm’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’]]
+
+Final Specific_h: [‘sunny’ ‘warm’ ‘?’ ‘strong’ ‘?’ ‘?’]
+
+Final General_h: [[‘sunny’, ‘?’, ‘?’, ‘?’, ‘?’, ‘?’], [‘?’, ‘warm’, ‘?’, ‘?’, ‘?’, ‘?’]]
+
+
+
+
+Hebian Learning Rule:
+
+
+Algorithm
+Hebbian Algorithm from page 49 of “Fundamentals of NN” by Fausset
+Step 0. Initialize all weights:
+    wi = 0 (i = 1 to n).
+Step 1. For each input training vector and target output pair, s:t, do steps 2-4.
+    Step 2. Set activations for input units:
+        xi = Si (i = 1 to n)
+    Step 3. Set activation for output unit:
+        y = t
+    Step 4. Adjust the weights for xi
+        wi(new) = wi(old) + xiy (i = 1 to n)
+        Adjust the bias:
+        b(new) = b(old) + y
+
+Code:
+
+def hebbian_learning(samples):
+     print(f'{"INPUT":^8} {"TARGET":^16}{"WEIGHT CHANGES":^15}{"WEIGHTS":^25}')
+     w1, w2, b = 0, 0, 0
+     print(' ' * 45, f'({w1:2}, {w2:2}, {b:2})')
+     for x1, x2, y in samples:
+         w1 = w1 + x1 * y
+         w2 = w2 + x2 * y
+         b = b + y
+         print(f'({x1:2}, {x2:2}) {y:2} ({x1y:2}, {x2y:2}, {y:2}) ({w1:2}, {w2:2}, {b:2})')
+
+
+Define Inputs
+AND_samples = {
+    'binary_input_binary_output': [
+        [1, 1, 1],
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 0]
+    ],
+    'binary_input_bipolar_output': [
+        [1, 1, 1],
+        [1, 0, -1],
+        [0, 1, -1],
+        [0, 0, -1]
+    ],
+    'bipolar_input_bipolar_output': [
+        [ 1, 1, 1],
+        [ 1, -1, -1],
+        [-1, 1, -1],
+        [-1, -1, -1]
+    ]
+}
+OR_samples = {
+    'binary_input_binary_output': [
+        [1, 1, 1],
+        [1, 0, 1],
+        [0, 1, 1],
+        [0, 0, 0]
+    ],
+    'binary_input_bipolar_output': [
+        [1, 1, 1],
+        [1, 0, 1],
+        [0, 1, 1],
+        [0, 0, -1]
+    ],
+    'bipolar_input_bipolar_output': [
+        [ 1, 1, 1],
+        [ 1, -1, 1],
+        [-1, 1, 1],
+        [-1, -1, -1]
+    ]
+}
+XOR_samples = {
+    'binary_input_binary_output': [
+        [1, 1, 0],
+        [1, 0, 1],
+        [0, 1, 1],
+        [0, 0, 0]
+    ],
+    'binary_input_bipolar_output': [
+        [1, 1, -1],
+        [1, 0, 1],
+        [0, 1, 1],
+        [0, 0, -1]
+    ],
+    'bipolar_input_bipolar_output': [
+        [ 1, 1, -1],
+        [ 1, -1, 1],
+        [-1, 1, 1],
+        [-1, -1, -1]
+    ]
+}
+Test Code with Output
+print('-'20, 'HEBBIAN LEARNING', '-'20)
+print('AND with Binary Input and Binary Output')
+hebbian_learning(AND_samples['binary_input_binary_output'])
+print('AND with Binary Input and Bipolar Output')
+hebbian_learning(AND_samples['binary_input_bipolar_output'])
+print('AND with Bipolar Input and Bipolar Output')
+hebbian_learning(AND_samples['bipolar_input_bipolar_output'])
+
+print('-'20, 'HEBBIAN LEARNING', '-'20)
+print('OR with binary input and binary output')
+hebbian_learning(OR_samples['binary_input_binary_output'])
+print('OR with binary input and bipolar output')
+hebbian_learning(OR_samples['binary_input_bipolar_output'])
+print('OR with bipolar input and bipolar output')
+hebbian_learning(OR_samples['bipolar_input_bipolar_output'])
+
+print('-'20, 'HEBBIAN LEARNING', '-'20)
+print('XOR with binary input and binary output')
+hebbian_learning(XOR_samples['binary_input_binary_output'])
+print('XOR with binary input and bipolar output')
+hebbian_learning(XOR_samples['binary_input_bipolar_output'])
+print('XOR with bipolar input and bipolar output')
+hebbian_learning(XOR_samples['bipolar_input_bipolar_output'])
+
+
+
